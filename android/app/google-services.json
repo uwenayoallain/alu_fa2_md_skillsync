@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "825420618141",
+    "project_id": "skillsync-app-e7ae7",
+    "storage_bucket": "skillsync-app-e7ae7.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:825420618141:android:4cb5dcd5ba3ca140a47774",
+        "android_client_info": {
+          "package_name": "com.alu.skillsync"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "825420618141-3pfcggh4q7jv6p39ejmv9351d14aoq5c.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAYJr1av-mAwYy7Clmc5ViQE0gyLxBcYiY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "825420618141-3pfcggh4q7jv6p39ejmv9351d14aoq5c.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
