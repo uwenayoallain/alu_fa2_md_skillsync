@@ -1,0 +1,68 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    // A startup document owned by the caller that has been verified by an admin.
+    function ownsVerifiedStartup(startupId) {
+      let startup = get(/databases/$(database)/documents/startups/$(startupId)).data;
+      return startup.ownerId == request.auth.uid && startup.verified == true;
+    }
+
+    function ownsStartup(startupId) {
+      return get(/databases/$(database)/documents/startups/$(startupId)).data.ownerId
+          == request.auth.uid;
+    }
+
+    // User profiles: readable by any signed-in user (startups need to review
+    // applicant profiles), writable only by the profile owner.
+    match /users/{uid} {
+      allow read: if signedIn();
+      allow create, update: if isOwner(uid);
+    }
+
+    // Startup profiles: anyone signed in can browse them. Founders create
+    // their own profile, but it always starts unverified — the `verified`
+    // flag can only be granted by an admin (Firebase console), never by the
+    // founder themselves.
+    match /startups/{startupId} {
+      allow read: if signedIn();
+      allow create: if isOwner(request.resource.data.ownerId)
+                    && request.resource.data.verified == false;
+      allow update: if isOwner(resource.data.ownerId)
+                    && request.resource.data.verified == resource.data.verified
+                    && request.resource.data.ownerId == resource.data.ownerId;
+    }
+
+    // Opportunities: readable by all signed-in users. Only the owner of a
+    // *verified* startup can post; only the posting startup's owner can
+    // update or delete.
+    match /opportunities/{oppId} {
+      allow read: if signedIn();
+      allow create: if signedIn() && ownsVerifiedStartup(request.resource.data.startupId);
+      allow update, delete: if signedIn() && ownsStartup(resource.data.startupId);
+    }
+
+    // Applications: a student may apply as themselves and may withdraw their
+    // own application. The startup owner reviews applications and is the only
+    // party allowed to change their status.
+    match /applications/{appId} {
+      allow read: if isOwner(resource.data.studentId)
+                  || (signedIn() && ownsStartup(resource.data.startupId));
+      allow create: if isOwner(request.resource.data.studentId)
+                    && request.resource.data.status == 'submitted';
+      allow update: if signedIn() && ownsStartup(resource.data.startupId)
+                    && request.resource.data.studentId == resource.data.studentId
+                    && request.resource.data.opportunityId == resource.data.opportunityId;
+      allow delete: if isOwner(resource.data.studentId);
+    }
+  }
+}

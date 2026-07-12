@@ -1,0 +1,25 @@
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "skillsync-app-e7ae7",
+          "appId": "1:825420618141:android:4cb5dcd5ba3ca140a47774",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "skillsync-app-e7ae7",
+          "configurations": {
+            "android": "1:825420618141:android:4cb5dcd5ba3ca140a47774"
+          }
+        }
+      }
+    }
+  },
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  }
+}
