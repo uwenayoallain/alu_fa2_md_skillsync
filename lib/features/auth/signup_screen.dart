@@ -35,17 +35,17 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _busy = true);
     try {
-      final cred = await ref
-          .read(authRepositoryProvider)
-          .signUp(_email.text, _password.text);
-      // Create the Firestore profile right after the auth account so the
-      // AuthGate can route by role immediately.
-      await ref.read(userRepositoryProvider).createUser(AppUser(
-            uid: cred.user!.uid,
-            name: _name.text.trim(),
-            email: _email.text.trim(),
-            role: _role,
-          ));
+      final cred = await ref.read(authRepositoryProvider).signUp(_email.text, _password.text);
+      await ref
+          .read(userRepositoryProvider)
+          .createUser(
+            AppUser(
+              uid: cred.user!.uid,
+              name: _name.text.trim(),
+              email: _email.text.trim(),
+              role: _role,
+            ),
+          );
       if (mounted) Navigator.of(context).pop(); // back to gate -> shell
     } catch (e) {
       if (mounted) showAppSnackBar(context, friendlyAuthError(e), error: true);
@@ -66,17 +66,17 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Text('Join the ALU startup ecosystem',
-                    style:
-                        TextStyle(fontSize: 22, fontWeight: FontWeight.w800)),
+                const Text(
+                  'Join the ALU startup ecosystem',
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800),
+                ),
                 const SizedBox(height: 6),
                 const Text(
                   'Gain real experience — or find the talent your venture needs.',
                   style: TextStyle(color: AppColors.textSecondary),
                 ),
                 const SizedBox(height: 24),
-                const Text('I am joining as…',
-                    style: TextStyle(fontWeight: FontWeight.w700)),
+                const Text('I am joining as…', style: TextStyle(fontWeight: FontWeight.w700)),
                 const SizedBox(height: 10),
                 Row(
                   children: [
@@ -129,17 +129,16 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                     hintText: 'Password (min 6 characters)',
                     prefixIcon: const Icon(Icons.lock_outline_rounded),
                     suffixIcon: IconButton(
-                      icon: Icon(_obscure
-                          ? Icons.visibility_outlined
-                          : Icons.visibility_off_outlined),
+                      icon: Icon(
+                        _obscure ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                      ),
                       onPressed: () => setState(() => _obscure = !_obscure),
                     ),
                   ),
                   validator: Validators.password,
                 ),
                 const SizedBox(height: 24),
-                PrimaryButton(
-                    label: 'Create account', busy: _busy, onPressed: _signUp),
+                PrimaryButton(label: 'Create account', busy: _busy, onPressed: _signUp),
                 const SizedBox(height: 12),
                 if (_role == UserRole.founder)
                   const Text(
@@ -147,8 +146,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                     'opportunities, so only recognised ALU ventures appear '
                     'on the platform.',
                     textAlign: TextAlign.center,
-                    style: TextStyle(
-                        fontSize: 12.5, color: AppColors.textSecondary),
+                    style: TextStyle(fontSize: 12.5, color: AppColors.textSecondary),
                   ),
               ],
             ),
@@ -192,14 +190,11 @@ class _RoleCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(icon,
-                color: selected ? AppColors.primary : AppColors.textSecondary),
+            Icon(icon, color: selected ? AppColors.primary : AppColors.textSecondary),
             const SizedBox(height: 10),
             Text(title, style: const TextStyle(fontWeight: FontWeight.w800)),
             const SizedBox(height: 3),
-            Text(subtitle,
-                style: const TextStyle(
-                    fontSize: 12, color: AppColors.textSecondary)),
+            Text(subtitle, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
           ],
         ),
       ),

@@ -10,8 +10,6 @@ import '../../models/startup.dart';
 import '../../providers/providers.dart';
 import 'post_opportunity_screen.dart';
 
-/// Founder home: verification status, live posting/applicant stats, and
-/// management of the startup's opportunities (post, edit, close, delete).
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key, required this.startup});
 
@@ -20,8 +18,7 @@ class DashboardScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final opps = ref.watch(startupOpportunitiesProvider(startup.id));
-    final apps =
-        ref.watch(startupApplicationsProvider(startup.id)).value ?? [];
+    final apps = ref.watch(startupApplicationsProvider(startup.id)).value ?? [];
 
     return SafeArea(
       child: ListView(
@@ -38,21 +35,22 @@ class DashboardScreen extends ConsumerWidget {
                     Row(
                       children: [
                         Flexible(
-                          child: Text(startup.name,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                  fontSize: 20, fontWeight: FontWeight.w800)),
+                          child: Text(
+                            startup.name,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+                          ),
                         ),
                         if (startup.verified) ...[
                           const SizedBox(width: 6),
-                          const Icon(Icons.verified_rounded,
-                              size: 20, color: AppColors.primary),
+                          const Icon(Icons.verified_rounded, size: 20, color: AppColors.primary),
                         ],
                       ],
                     ),
-                    Text(startup.category,
-                        style: const TextStyle(
-                            fontSize: 13, color: AppColors.textSecondary)),
+                    Text(
+                      startup.category,
+                      style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                    ),
                   ],
                 ),
               ),
@@ -77,9 +75,7 @@ class DashboardScreen extends ConsumerWidget {
               const SizedBox(width: 12),
               _StatCard(
                 icon: Icons.hourglass_top_rounded,
-                count: apps
-                    .where((a) => a.status == ApplicationStatus.submitted)
-                    .length,
+                count: apps.where((a) => a.status == ApplicationStatus.submitted).length,
                 label: 'New',
               ),
             ],
@@ -89,8 +85,9 @@ class DashboardScreen extends ConsumerWidget {
             'My opportunities',
             actionLabel: startup.verified ? '+ Post new' : null,
             onAction: startup.verified
-                ? () => Navigator.of(context).push(MaterialPageRoute(
-                    builder: (_) => PostOpportunityScreen(startup: startup)))
+                ? () => Navigator.of(
+                    context,
+                  ).push(MaterialPageRoute(builder: (_) => PostOpportunityScreen(startup: startup)))
                 : null,
           ),
           const SizedBox(height: 12),
@@ -119,40 +116,24 @@ class DashboardScreen extends ConsumerWidget {
   }
 }
 
-/// Shown while `verified == false`. Because the startup doc is a live
-/// stream, the moment an admin flips the flag in the Firebase console this
-/// banner disappears and posting unlocks — no refresh needed.
 class _PendingVerificationBanner extends StatelessWidget {
   const _PendingVerificationBanner();
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: AppColors.warningSoft,
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: const Row(
-        children: [
-          Icon(Icons.pending_outlined, color: AppColors.warning),
-          SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              'Verification pending — the ALU venture team is reviewing your '
-              'startup. Posting unlocks once you\'re approved.',
-              style: TextStyle(fontSize: 13, color: AppColors.warning),
-            ),
-          ),
-        ],
-      ),
+    return const InfoBanner(
+      icon: Icons.pending_outlined,
+      message:
+          'Verification pending — the ALU venture team is reviewing your '
+          'startup. Posting unlocks once you\'re approved.',
+      color: AppColors.warning,
+      background: AppColors.warningSoft,
     );
   }
 }
 
 class _StatCard extends StatelessWidget {
-  const _StatCard(
-      {required this.icon, required this.count, required this.label});
+  const _StatCard({required this.icon, required this.count, required this.label});
 
   final IconData icon;
   final int count;
@@ -168,12 +149,8 @@ class _StatCard extends StatelessWidget {
             children: [
               Icon(icon, color: AppColors.primary, size: 22),
               const SizedBox(height: 6),
-              Text('$count',
-                  style: const TextStyle(
-                      fontSize: 18, fontWeight: FontWeight.w800)),
-              Text(label,
-                  style: const TextStyle(
-                      fontSize: 11.5, color: AppColors.textSecondary)),
+              Text('$count', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+              Text(label, style: const TextStyle(fontSize: 11.5, color: AppColors.textSecondary)),
             ],
           ),
         ),
@@ -200,36 +177,36 @@ class _ManageOpportunityCard extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(opp.title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                          fontWeight: FontWeight.w700, fontSize: 15)),
+                  Text(
+                    opp.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
+                  ),
                   const SizedBox(height: 3),
                   Text(
                     '${opp.category} • ${opp.workType} • ${timeAgo(opp.createdAt ?? DateTime.now())}',
-                    style: const TextStyle(
-                        fontSize: 12, color: AppColors.textSecondary),
+                    style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
                   ),
                   const SizedBox(height: 6),
                   TagChip(
                     opp.open ? 'Open' : 'Closed',
                     color: opp.open ? AppColors.success : AppColors.danger,
-                    background:
-                        opp.open ? AppColors.successSoft : AppColors.dangerSoft,
+                    background: opp.open ? AppColors.successSoft : AppColors.dangerSoft,
                   ),
                 ],
               ),
             ),
             PopupMenuButton<String>(
-              icon: const Icon(Icons.more_vert_rounded,
-                  color: AppColors.textSecondary),
+              icon: const Icon(Icons.more_vert_rounded, color: AppColors.textSecondary),
               onSelected: (action) async {
                 switch (action) {
                   case 'edit':
-                    Navigator.of(context).push(MaterialPageRoute(
-                        builder: (_) => PostOpportunityScreen(
-                            startup: startup, existing: opp)));
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => PostOpportunityScreen(startup: startup, existing: opp),
+                      ),
+                    );
                   case 'toggle':
                     await repo.update(opp.id, {'open': !opp.open});
                   case 'delete':
@@ -239,12 +216,12 @@ class _ManageOpportunityCard extends ConsumerWidget {
               itemBuilder: (_) => [
                 const PopupMenuItem(value: 'edit', child: Text('Edit')),
                 PopupMenuItem(
-                    value: 'toggle',
-                    child: Text(opp.open ? 'Close applications' : 'Reopen')),
+                  value: 'toggle',
+                  child: Text(opp.open ? 'Close applications' : 'Reopen'),
+                ),
                 const PopupMenuItem(
                   value: 'delete',
-                  child: Text('Delete',
-                      style: TextStyle(color: AppColors.danger)),
+                  child: Text('Delete', style: TextStyle(color: AppColors.danger)),
                 ),
               ],
             ),
@@ -254,31 +231,19 @@ class _ManageOpportunityCard extends ConsumerWidget {
     );
   }
 
-  void _confirmDelete(BuildContext context, WidgetRef ref) {
-    showDialog<void>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Delete opportunity?'),
-        content: Text('"${opp.title}" will be permanently removed. '
-            'Existing applications will remain in your applicant list.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            style: TextButton.styleFrom(foregroundColor: AppColors.danger),
-            onPressed: () async {
-              Navigator.of(dialogContext).pop();
-              await ref.read(opportunityRepositoryProvider).delete(opp.id);
-              if (context.mounted) {
-                showAppSnackBar(context, 'Opportunity deleted.');
-              }
-            },
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
-    );
+  Future<void> _confirmDelete(BuildContext context, WidgetRef ref) async {
+    if (!await confirmDanger(
+      context,
+      title: 'Delete opportunity?',
+      content:
+          '"${opp.title}" will be permanently removed. '
+          'Existing applications will remain in your applicant list.',
+      cancel: 'Cancel',
+      confirm: 'Delete',
+    )) {
+      return;
+    }
+    await ref.read(opportunityRepositoryProvider).delete(opp.id);
+    if (context.mounted) showAppSnackBar(context, 'Opportunity deleted.');
   }
 }

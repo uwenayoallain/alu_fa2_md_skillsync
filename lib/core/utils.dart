@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-/// Form validators shared by every text field in the app.
 abstract final class Validators {
   static String? required(String? v, [String field = 'This field']) {
     if (v == null || v.trim().isEmpty) return '$field is required';
@@ -29,7 +28,6 @@ abstract final class Validators {
   }
 }
 
-/// "Posted 2d ago" style timestamps for cards and lists.
 String timeAgo(DateTime date) {
   final diff = DateTime.now().difference(date);
   if (diff.inMinutes < 1) return 'just now';
@@ -40,8 +38,6 @@ String timeAgo(DateTime date) {
   return DateFormat('d MMM yyyy').format(date);
 }
 
-/// Maps a common set of FirebaseAuth error codes to friendly messages so
-/// screens never surface raw exception text to users.
 String friendlyAuthError(Object error) {
   final text = error.toString();
   if (text.contains('invalid-credential') ||
@@ -67,8 +63,7 @@ String friendlyAuthError(Object error) {
 void showAppSnackBar(BuildContext context, String message, {bool error = false}) {
   ScaffoldMessenger.of(context)
     ..hideCurrentSnackBar()
-    ..showSnackBar(SnackBar(
-      content: Text(message),
-      backgroundColor: error ? const Color(0xFFD03E5E) : null,
-    ));
+    ..showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: error ? const Color(0xFFD03E5E) : null),
+    );
 }

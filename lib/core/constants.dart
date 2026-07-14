@@ -1,4 +1,3 @@
-/// Shared domain vocabulary used across forms, filters and matching.
 abstract final class OpportunityCategories {
   static const all = [
     'Engineering',
@@ -14,26 +13,13 @@ abstract final class OpportunityCategories {
 }
 
 abstract final class WorkTypes {
-  static const all = [
-    'Part-time',
-    'Full-time',
-    'Project-based',
-    'Volunteer',
-  ];
+  static const all = ['Part-time', 'Full-time', 'Project-based', 'Volunteer'];
 }
 
 abstract final class Locations {
-  static const all = [
-    'On-campus',
-    'Remote',
-    'Hybrid',
-    'Kigali',
-  ];
+  static const all = ['On-campus', 'Remote', 'Hybrid', 'Kigali'];
 }
 
-/// Suggested skills shown during student onboarding and opportunity posting.
-/// Users can also type their own; these just reduce friction and keep the
-/// vocabulary consistent enough for skill matching to work.
 abstract final class SuggestedSkills {
   static const all = [
     'Flutter',

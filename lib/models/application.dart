@@ -13,32 +13,28 @@ enum ApplicationStatus {
   const ApplicationStatus(this.label);
   final String label;
 
-  static ApplicationStatus fromName(String? name) =>
-      ApplicationStatus.values.firstWhere((s) => s.name == name,
-          orElse: () => ApplicationStatus.submitted);
+  static ApplicationStatus fromName(String? name) => ApplicationStatus.values.firstWhere(
+    (s) => s.name == name,
+    orElse: () => ApplicationStatus.submitted,
+  );
 
   Color get color => switch (this) {
-        submitted => AppColors.info,
-        underReview => AppColors.warning,
-        shortlisted => AppColors.primaryDark,
-        accepted => AppColors.success,
-        rejected => AppColors.danger,
-      };
+    submitted => AppColors.info,
+    underReview => AppColors.warning,
+    shortlisted => AppColors.primaryDark,
+    accepted => AppColors.success,
+    rejected => AppColors.danger,
+  };
 
   Color get softColor => switch (this) {
-        submitted => AppColors.infoSoft,
-        underReview => AppColors.warningSoft,
-        shortlisted => AppColors.primarySoft,
-        accepted => AppColors.successSoft,
-        rejected => AppColors.dangerSoft,
-      };
+    submitted => AppColors.infoSoft,
+    underReview => AppColors.warningSoft,
+    shortlisted => AppColors.primarySoft,
+    accepted => AppColors.successSoft,
+    rejected => AppColors.dangerSoft,
+  };
 }
 
-/// A student's application, stored at `applications/{id}`.
-///
-/// Both sides of the marketplace query this collection (student: "my
-/// applications", founder: "applicants to my startup"), so identifying
-/// fields from the opportunity and student are denormalised here.
 class Application {
   const Application({
     required this.id,
@@ -81,16 +77,14 @@ class Application {
   }
 
   Map<String, dynamic> toMap() => {
-        'opportunityId': opportunityId,
-        'opportunityTitle': opportunityTitle,
-        'startupId': startupId,
-        'startupName': startupName,
-        'studentId': studentId,
-        'studentName': studentName,
-        'message': message,
-        'status': status.name,
-        'createdAt': createdAt == null
-            ? FieldValue.serverTimestamp()
-            : Timestamp.fromDate(createdAt!),
-      };
+    'opportunityId': opportunityId,
+    'opportunityTitle': opportunityTitle,
+    'startupId': startupId,
+    'startupName': startupName,
+    'studentId': studentId,
+    'studentName': studentName,
+    'message': message,
+    'status': status.name,
+    'createdAt': createdAt == null ? FieldValue.serverTimestamp() : Timestamp.fromDate(createdAt!),
+  };
 }

@@ -1,9 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-/// An internship / contribution opportunity stored at `opportunities/{id}`.
-///
-/// The posting startup's name and verification flag are denormalised onto the
-/// document so list screens render from a single query instead of N+1 reads.
 class Opportunity {
   const Opportunity({
     required this.id,
@@ -52,23 +48,19 @@ class Opportunity {
   }
 
   Map<String, dynamic> toMap() => {
-        'startupId': startupId,
-        'startupName': startupName,
-        'title': title,
-        'description': description,
-        'category': category,
-        'workType': workType,
-        'location': location,
-        'skills': skills,
-        'hoursPerWeek': hoursPerWeek,
-        'open': open,
-        'createdAt': createdAt == null
-            ? FieldValue.serverTimestamp()
-            : Timestamp.fromDate(createdAt!),
-      };
+    'startupId': startupId,
+    'startupName': startupName,
+    'title': title,
+    'description': description,
+    'category': category,
+    'workType': workType,
+    'location': location,
+    'skills': skills,
+    'hoursPerWeek': hoursPerWeek,
+    'open': open,
+    'createdAt': createdAt == null ? FieldValue.serverTimestamp() : Timestamp.fromDate(createdAt!),
+  };
 
-  /// How many of the student's skills this opportunity asks for.
-  /// Drives the "Recommended for you" ranking on the home screen.
   int matchScore(List<String> studentSkills) {
     final lower = studentSkills.map((s) => s.toLowerCase()).toSet();
     return skills.where((s) => lower.contains(s.toLowerCase())).length;

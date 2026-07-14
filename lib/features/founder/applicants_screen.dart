@@ -8,10 +8,6 @@ import '../../models/application.dart';
 import '../../models/startup.dart';
 import '../../providers/providers.dart';
 
-/// Live list of everyone who applied to this startup's opportunities.
-/// Opening an applicant shows their pitch, profile and skills, and lets the
-/// founder move the application through the review pipeline — the student's
-/// tracker updates in real time.
 class ApplicantsScreen extends ConsumerWidget {
   const ApplicantsScreen({super.key, required this.startup});
 
@@ -27,8 +23,7 @@ class ApplicantsScreen extends ConsumerWidget {
         children: [
           const Padding(
             padding: EdgeInsets.fromLTRB(20, 16, 20, 14),
-            child: Text('Applicants',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800)),
+            child: Text('Applicants', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800)),
           ),
           Expanded(
             child: AsyncView(
@@ -62,55 +57,31 @@ class _ApplicantCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: InkWell(
-        borderRadius: BorderRadius.circular(18),
-        onTap: () => showModalBottomSheet(
-          context: context,
-          isScrollControlled: true,
-          backgroundColor: AppColors.surface,
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-          ),
-          builder: (_) => _ApplicantDetailSheet(app: app),
+    return SummaryCard(
+      avatar: app.studentName,
+      title: app.studentName,
+      subtitle: 'For: ${app.opportunityTitle}',
+      meta: 'Applied ${timeAgo(app.createdAt ?? DateTime.now())}',
+      truncateTitle: false,
+      truncateSubtitle: true,
+      onTap: () => showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: AppColors.surface,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
         ),
-        child: Padding(
-          padding: const EdgeInsets.all(14),
-          child: Row(
-            children: [
-              InitialsAvatar(app.studentName),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(app.studentName,
-                        style: const TextStyle(
-                            fontWeight: FontWeight.w700, fontSize: 15)),
-                    const SizedBox(height: 3),
-                    Text('For: ${app.opportunityTitle}',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                            fontSize: 13, color: AppColors.textSecondary)),
-                    const SizedBox(height: 3),
-                    Text('Applied ${timeAgo(app.createdAt ?? DateTime.now())}',
-                        style: const TextStyle(
-                            fontSize: 12, color: AppColors.textSecondary)),
-                  ],
-                ),
-              ),
-              TagChip(app.status.label,
-                  color: app.status.color, background: app.status.softColor),
-            ],
-          ),
-        ),
+        builder: (_) => _ApplicantDetailSheet(app: app),
+      ),
+      trailing: TagChip(
+        app.status.label,
+        color: app.status.color,
+        background: app.status.softColor,
       ),
     );
   }
 }
 
-/// Applicant detail: pitch, live profile (bio + skills) and status actions.
 class _ApplicantDetailSheet extends ConsumerWidget {
   const _ApplicantDetailSheet({required this.app});
 
@@ -119,9 +90,9 @@ class _ApplicantDetailSheet extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final profile = ref.watch(applicantProvider(app.studentId)).value;
-    // Watch the live application so the selected status chip updates
-    // immediately after a change.
-    final live = ref
+    // Keep the selected status live while this sheet is open.
+    final live =
+        ref
             .watch(startupApplicationsProvider(app.startupId))
             .value
             ?.where((a) => a.id == app.id)
@@ -144,25 +115,31 @@ class _ApplicantDetailSheet extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(app.studentName,
-                        style: const TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.w800)),
-                    Text(profile?.email ?? '',
-                        style: const TextStyle(
-                            fontSize: 13, color: AppColors.textSecondary)),
+                    Text(
+                      app.studentName,
+                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+                    ),
+                    Text(
+                      profile?.email ?? '',
+                      style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                    ),
                   ],
                 ),
               ),
-              TagChip(live.status.label,
-                  color: live.status.color, background: live.status.softColor),
+              TagChip(
+                live.status.label,
+                color: live.status.color,
+                background: live.status.softColor,
+              ),
             ],
           ),
           const SizedBox(height: 16),
-          Text('Applying for: ${app.opportunityTitle}',
-              style: const TextStyle(fontWeight: FontWeight.w700)),
+          Text(
+            'Applying for: ${app.opportunityTitle}',
+            style: const TextStyle(fontWeight: FontWeight.w700),
+          ),
           const SizedBox(height: 14),
-          const Text('Pitch',
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800)),
+          const Text('Pitch', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800)),
           const SizedBox(height: 6),
           Container(
             padding: const EdgeInsets.all(14),
@@ -174,25 +151,18 @@ class _ApplicantDetailSheet extends ConsumerWidget {
           ),
           if (profile != null && profile.bio.isNotEmpty) ...[
             const SizedBox(height: 14),
-            const Text('Bio',
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800)),
+            const Text('Bio', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800)),
             const SizedBox(height: 6),
             Text(profile.bio, style: const TextStyle(height: 1.5)),
           ],
           if (profile != null && profile.skills.isNotEmpty) ...[
             const SizedBox(height: 14),
-            const Text('Skills',
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800)),
+            const Text('Skills', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800)),
             const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [for (final s in profile.skills) TagChip(s)],
-            ),
+            Wrap(spacing: 8, runSpacing: 8, children: [for (final s in profile.skills) TagChip(s)]),
           ],
           const SizedBox(height: 20),
-          const Text('Update status',
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800)),
+          const Text('Update status', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800)),
           const SizedBox(height: 10),
           Wrap(
             spacing: 8,
@@ -211,12 +181,12 @@ class _ApplicantDetailSheet extends ConsumerWidget {
                   backgroundColor: s.softColor,
                   side: BorderSide.none,
                   onSelected: (_) async {
-                    await ref
-                        .read(applicationRepositoryProvider)
-                        .updateStatus(app.id, s);
+                    await ref.read(applicationRepositoryProvider).updateStatus(app.id, s);
                     if (context.mounted) {
-                      showAppSnackBar(context,
-                          '${app.studentName.split(' ').first} moved to "${s.label}".');
+                      showAppSnackBar(
+                        context,
+                        '${app.studentName.split(' ').first} moved to "${s.label}".',
+                      );
                     }
                   },
                 ),

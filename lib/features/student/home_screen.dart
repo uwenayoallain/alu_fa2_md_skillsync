@@ -11,8 +11,6 @@ import 'opportunity_detail_screen.dart';
 import 'student_shell.dart';
 import 'widgets/opportunity_card.dart';
 
-/// Student landing screen: greeting, skill-matched recommendations,
-/// category shortcuts and the latest openings — all live Firestore streams.
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
@@ -34,12 +32,13 @@ class HomeScreen extends ConsumerWidget {
                   children: [
                     Text(
                       'Hello, ${user?.name.split(' ').first ?? 'there'}',
-                      style: const TextStyle(
-                          fontSize: 24, fontWeight: FontWeight.w800),
+                      style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800),
                     ),
                     const SizedBox(height: 3),
-                    const Text('Find meaningful ways to contribute.',
-                        style: TextStyle(color: AppColors.textSecondary)),
+                    const Text(
+                      'Find meaningful ways to contribute.',
+                      style: TextStyle(color: AppColors.textSecondary),
+                    ),
                   ],
                 ),
               ),
@@ -61,8 +60,8 @@ class HomeScreen extends ConsumerWidget {
                 ? const EmptyState(
                     icon: Icons.work_outline_rounded,
                     title: 'No opportunities yet',
-                    message:
-                        'Startups are getting set up — check back soon!')
+                    message: 'Startups are getting set up — check back soon!',
+                  )
                 : Column(
                     children: [
                       for (final o in opps.take(6)) ...[
@@ -88,20 +87,19 @@ class _RecommendedSection extends ConsumerWidget {
     final skills = ref.watch(currentUserProvider).value?.skills ?? [];
     final items = recommended.value ?? [];
     if (items.isEmpty) {
-      // No matches (or no skills yet) — hide the rail rather than show noise.
       return skills.isEmpty
           ? Card(
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Row(
                   children: [
-                    const Icon(Icons.person_outline_rounded,
-                        color: AppColors.primary),
+                    const Icon(Icons.person_outline_rounded, color: AppColors.primary),
                     const SizedBox(width: 12),
                     const Expanded(
                       child: Text(
-                          'Add your skills to unlock personalised recommendations.',
-                          style: TextStyle(fontSize: 13.5)),
+                        'Add your skills to unlock personalised recommendations.',
+                        style: TextStyle(fontSize: 13.5),
+                      ),
                     ),
                   ],
                 ),
@@ -120,8 +118,7 @@ class _RecommendedSection extends ConsumerWidget {
             scrollDirection: Axis.horizontal,
             itemCount: items.length,
             separatorBuilder: (_, _) => const SizedBox(width: 12),
-            itemBuilder: (_, i) =>
-                _RecommendedCard(items[i], studentSkills: skills),
+            itemBuilder: (_, i) => _RecommendedCard(items[i], studentSkills: skills),
           ),
         ),
       ],
@@ -129,7 +126,6 @@ class _RecommendedSection extends ConsumerWidget {
   }
 }
 
-/// Gradient hero card used in the horizontal recommendation rail.
 class _RecommendedCard extends StatelessWidget {
   const _RecommendedCard(this.opp, {required this.studentSkills});
 
@@ -140,8 +136,9 @@ class _RecommendedCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final matches = opp.matchScore(studentSkills);
     return GestureDetector(
-      onTap: () => Navigator.of(context).push(MaterialPageRoute(
-          builder: (_) => OpportunityDetailScreen(id: opp.id))),
+      onTap: () => Navigator.of(
+        context,
+      ).push(MaterialPageRoute(builder: (_) => OpportunityDetailScreen(id: opp.id))),
       child: Container(
         width: 270,
         padding: const EdgeInsets.all(16),
@@ -155,49 +152,50 @@ class _RecommendedCard extends StatelessWidget {
             Text(
               '$matches skill match${matches == 1 ? '' : 'es'}',
               style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700),
+                color: Colors.white,
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+              ),
             ),
             const Spacer(),
-            Text(opp.title,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 17,
-                    fontWeight: FontWeight.w800)),
+            Text(
+              opp.title,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 17,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
             const SizedBox(height: 4),
-            Text(opp.startupName,
-                style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.9), fontSize: 13)),
+            Text(
+              opp.startupName,
+              style: TextStyle(color: Colors.white.withValues(alpha: 0.9), fontSize: 13),
+            ),
             const SizedBox(height: 10),
             Wrap(
               spacing: 6,
               runSpacing: 6,
               children: [
                 for (final s in opp.skills.take(3))
-                  TagChip(s,
-                      color: Colors.white,
-                      background: Colors.white.withValues(alpha: 0.22)),
+                  TagChip(s, color: Colors.white, background: Colors.white.withValues(alpha: 0.22)),
               ],
             ),
             const SizedBox(height: 8),
             Row(
               children: [
-                Icon(Icons.schedule_rounded,
-                    size: 14, color: Colors.white.withValues(alpha: 0.9)),
+                Icon(Icons.schedule_rounded, size: 14, color: Colors.white.withValues(alpha: 0.9)),
                 const SizedBox(width: 4),
                 Text(
                   opp.hoursPerWeek.isEmpty ? opp.workType : opp.hoursPerWeek,
-                  style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.9), fontSize: 12),
+                  style: TextStyle(color: Colors.white.withValues(alpha: 0.9), fontSize: 12),
                 ),
                 const Spacer(),
-                Text('Posted ${timeAgo(opp.createdAt ?? DateTime.now())}',
-                    style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.9),
-                        fontSize: 12)),
+                Text(
+                  'Posted ${timeAgo(opp.createdAt ?? DateTime.now())}',
+                  style: TextStyle(color: Colors.white.withValues(alpha: 0.9), fontSize: 12),
+                ),
               ],
             ),
           ],
@@ -207,7 +205,6 @@ class _RecommendedCard extends StatelessWidget {
   }
 }
 
-/// Category shortcuts that jump to Explore with the filter pre-applied.
 class _CategoryRow extends ConsumerWidget {
   const _CategoryRow();
 
@@ -221,9 +218,7 @@ class _CategoryRow extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final categories = OpportunityCategories.all
-        .where((c) => _icons.containsKey(c))
-        .toList();
+    final categories = OpportunityCategories.all.where((c) => _icons.containsKey(c)).toList();
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -246,9 +241,7 @@ class _CategoryRow extends ConsumerWidget {
                   child: Icon(_icons[c], color: AppColors.primary),
                 ),
                 const SizedBox(height: 6),
-                Text(c,
-                    style: const TextStyle(
-                        fontSize: 11.5, fontWeight: FontWeight.w600)),
+                Text(c, style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600)),
               ],
             ),
           ),

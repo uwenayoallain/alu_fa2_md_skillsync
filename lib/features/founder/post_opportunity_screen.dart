@@ -8,8 +8,6 @@ import '../../models/opportunity.dart';
 import '../../models/startup.dart';
 import '../../providers/providers.dart';
 
-/// Create or edit an opportunity. Pass [existing] to edit; the same form is
-/// reused for both so validation and layout stay consistent.
 class PostOpportunityScreen extends ConsumerStatefulWidget {
   const PostOpportunityScreen({super.key, required this.startup, this.existing});
 
@@ -17,19 +15,15 @@ class PostOpportunityScreen extends ConsumerStatefulWidget {
   final Opportunity? existing;
 
   @override
-  ConsumerState<PostOpportunityScreen> createState() =>
-      _PostOpportunityScreenState();
+  ConsumerState<PostOpportunityScreen> createState() => _PostOpportunityScreenState();
 }
 
 class _PostOpportunityScreenState extends ConsumerState<PostOpportunityScreen> {
   final _formKey = GlobalKey<FormState>();
   late final _title = TextEditingController(text: widget.existing?.title);
-  late final _description =
-      TextEditingController(text: widget.existing?.description);
-  late final _hours =
-      TextEditingController(text: widget.existing?.hoursPerWeek);
-  late String _category =
-      widget.existing?.category ?? OpportunityCategories.all.first;
+  late final _description = TextEditingController(text: widget.existing?.description);
+  late final _hours = TextEditingController(text: widget.existing?.hoursPerWeek);
+  late String _category = widget.existing?.category ?? OpportunityCategories.all.first;
   late String _workType = widget.existing?.workType ?? WorkTypes.all.first;
   late String _location = widget.existing?.location ?? Locations.all.first;
   late List<String> _skills = List.from(widget.existing?.skills ?? []);
@@ -65,29 +59,29 @@ class _PostOpportunityScreenState extends ConsumerState<PostOpportunityScreen> {
           'hoursPerWeek': _hours.text.trim(),
         });
       } else {
-        await repo.create(Opportunity(
-          id: '',
-          startupId: widget.startup.id,
-          startupName: widget.startup.name,
-          title: _title.text.trim(),
-          description: _description.text.trim(),
-          category: _category,
-          workType: _workType,
-          location: _location,
-          skills: _skills,
-          hoursPerWeek: _hours.text.trim(),
-        ));
+        await repo.create(
+          Opportunity(
+            id: '',
+            startupId: widget.startup.id,
+            startupName: widget.startup.name,
+            title: _title.text.trim(),
+            description: _description.text.trim(),
+            category: _category,
+            workType: _workType,
+            location: _location,
+            skills: _skills,
+            hoursPerWeek: _hours.text.trim(),
+          ),
+        );
       }
       if (mounted) {
         Navigator.of(context).pop();
-        showAppSnackBar(
-            context, _isEdit ? 'Opportunity updated.' : 'Opportunity posted.');
+        showAppSnackBar(context, _isEdit ? 'Opportunity updated.' : 'Opportunity posted.');
       }
     } catch (_) {
       if (mounted) {
         setState(() => _busy = false);
-        showAppSnackBar(context, 'Could not save. Check your connection.',
-            error: true);
+        showAppSnackBar(context, 'Could not save. Check your connection.', error: true);
       }
     }
   }
@@ -95,8 +89,7 @@ class _PostOpportunityScreenState extends ConsumerState<PostOpportunityScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar:
-          AppBar(title: Text(_isEdit ? 'Edit opportunity' : 'Post opportunity')),
+      appBar: AppBar(title: Text(_isEdit ? 'Edit opportunity' : 'Post opportunity')),
       body: SafeArea(
         child: Form(
           key: _formKey,
@@ -107,8 +100,9 @@ class _PostOpportunityScreenState extends ConsumerState<PostOpportunityScreen> {
                 controller: _title,
                 textCapitalization: TextCapitalization.words,
                 decoration: const InputDecoration(
-                    labelText: 'Role title',
-                    hintText: 'e.g. Flutter Developer'),
+                  labelText: 'Role title',
+                  hintText: 'e.g. Flutter Developer',
+                ),
                 validator: (v) => Validators.required(v, 'Role title'),
               ),
               const SizedBox(height: 14),
@@ -119,8 +113,7 @@ class _PostOpportunityScreenState extends ConsumerState<PostOpportunityScreen> {
                 textCapitalization: TextCapitalization.sentences,
                 decoration: const InputDecoration(
                   labelText: 'Role description',
-                  hintText:
-                      'What will the student work on? What will they learn?',
+                  hintText: 'What will the student work on? What will they learn?',
                   alignLabelWithHint: true,
                 ),
                 validator: (v) => Validators.minLength(v, 50, 'Description'),
@@ -141,11 +134,9 @@ class _PostOpportunityScreenState extends ConsumerState<PostOpportunityScreen> {
                   Expanded(
                     child: DropdownButtonFormField<String>(
                       initialValue: _workType,
-                      decoration:
-                          const InputDecoration(labelText: 'Commitment'),
+                      decoration: const InputDecoration(labelText: 'Commitment'),
                       items: [
-                        for (final t in WorkTypes.all)
-                          DropdownMenuItem(value: t, child: Text(t)),
+                        for (final t in WorkTypes.all) DropdownMenuItem(value: t, child: Text(t)),
                       ],
                       onChanged: (v) => setState(() => _workType = v!),
                     ),
@@ -156,8 +147,7 @@ class _PostOpportunityScreenState extends ConsumerState<PostOpportunityScreen> {
                       initialValue: _location,
                       decoration: const InputDecoration(labelText: 'Location'),
                       items: [
-                        for (final l in Locations.all)
-                          DropdownMenuItem(value: l, child: Text(l)),
+                        for (final l in Locations.all) DropdownMenuItem(value: l, child: Text(l)),
                       ],
                       onChanged: (v) => setState(() => _location = v!),
                     ),
@@ -168,12 +158,15 @@ class _PostOpportunityScreenState extends ConsumerState<PostOpportunityScreen> {
               TextFormField(
                 controller: _hours,
                 decoration: const InputDecoration(
-                    labelText: 'Time commitment (optional)',
-                    hintText: 'e.g. 8–10 hrs/week'),
+                  labelText: 'Time commitment (optional)',
+                  hintText: 'e.g. 8–10 hrs/week',
+                ),
               ),
               const SizedBox(height: 20),
-              const Text('Required skills',
-                  style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
+              const Text(
+                'Required skills',
+                style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
+              ),
               const SizedBox(height: 10),
               SkillPicker(
                 selected: _skills,

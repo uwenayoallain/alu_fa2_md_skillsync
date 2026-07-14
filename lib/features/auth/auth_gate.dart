@@ -9,9 +9,7 @@ import '../student/student_shell.dart';
 import 'login_screen.dart';
 import 'student_onboarding_screen.dart';
 
-/// Local flag so students can skip skill onboarding for the session.
-final onboardingSkippedProvider =
-    NotifierProvider<_SkipNotifier, bool>(_SkipNotifier.new);
+final onboardingSkippedProvider = NotifierProvider<_SkipNotifier, bool>(_SkipNotifier.new);
 
 class _SkipNotifier extends Notifier<bool> {
   @override
@@ -19,16 +17,6 @@ class _SkipNotifier extends Notifier<bool> {
   void skip() => state = true;
 }
 
-/// Root router of the app. Watches the FirebaseAuth session and the user's
-/// Firestore profile, and swaps the whole widget tree accordingly:
-///
-///   signed out            -> LoginScreen
-///   student, no skills    -> StudentOnboardingScreen (skippable)
-///   student               -> StudentShell
-///   founder               -> FounderShell (which handles startup onboarding)
-///
-/// Because this is driven by streams, signing in/out or completing
-/// onboarding transitions the UI automatically — no manual navigation.
 class AuthGate extends ConsumerWidget {
   const AuthGate({super.key});
 
@@ -44,7 +32,6 @@ class AuthGate extends ConsumerWidget {
 
         final user = ref.watch(currentUserProvider);
         return user.when(
-          // Brief moment between auth signup and the profile doc landing.
           loading: () => const _Splash(),
           error: (_, _) => const _Splash(),
           data: (profile) {
@@ -75,8 +62,7 @@ class _Splash extends StatelessWidget {
           children: [
             Icon(Icons.hub_rounded, size: 56, color: AppColors.primary),
             SizedBox(height: 14),
-            Text('SkillSync',
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800)),
+            Text('SkillSync', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800)),
             SizedBox(height: 24),
             CircularProgressIndicator(),
           ],

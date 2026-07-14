@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// Central design tokens for SkillSync.
-///
-/// The palette is a soft lavender surface with a violet primary, chosen to
-/// feel energetic and student-friendly while keeping text contrast AA-safe.
 abstract final class AppColors {
   static const primary = Color(0xFF6C4DF4);
   static const primaryDark = Color(0xFF5438C9);
@@ -60,8 +56,7 @@ abstract final class AppTheme {
         filled: true,
         fillColor: AppColors.surface,
         hintStyle: const TextStyle(color: AppColors.textSecondary),
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
           borderSide: const BorderSide(color: AppColors.outline),
@@ -89,9 +84,7 @@ abstract final class AppTheme {
           foregroundColor: Colors.white,
           minimumSize: const Size.fromHeight(52),
           textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
@@ -100,9 +93,7 @@ abstract final class AppTheme {
           minimumSize: const Size.fromHeight(52),
           side: const BorderSide(color: AppColors.primary, width: 1.4),
           textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         ),
       ),
       textButtonTheme: TextButtonThemeData(

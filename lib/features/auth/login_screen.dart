@@ -32,10 +32,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _busy = true);
     try {
-      await ref
-          .read(authRepositoryProvider)
-          .signIn(_email.text, _password.text);
-      // AuthGate reacts to the auth stream; no navigation needed here.
+      await ref.read(authRepositoryProvider).signIn(_email.text, _password.text);
     } catch (e) {
       if (mounted) showAppSnackBar(context, friendlyAuthError(e), error: true);
     } finally {
@@ -64,8 +61,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         color: AppColors.primary,
                         borderRadius: BorderRadius.circular(22),
                       ),
-                      child: const Icon(Icons.hub_rounded,
-                          color: Colors.white, size: 38),
+                      child: const Icon(Icons.hub_rounded, color: Colors.white, size: 38),
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -100,9 +96,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       hintText: 'Password',
                       prefixIcon: const Icon(Icons.lock_outline_rounded),
                       suffixIcon: IconButton(
-                        icon: Icon(_obscure
-                            ? Icons.visibility_outlined
-                            : Icons.visibility_off_outlined),
+                        icon: Icon(
+                          _obscure ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                        ),
                         onPressed: () => setState(() => _obscure = !_obscure),
                       ),
                     ),
@@ -115,15 +111,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text("New to SkillSync?",
-                          style: TextStyle(color: AppColors.textSecondary)),
+                      const Text(
+                        "New to SkillSync?",
+                        style: TextStyle(color: AppColors.textSecondary),
+                      ),
                       TextButton(
                         onPressed: _busy
                             ? null
-                            : () => Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                      builder: (_) => const SignupScreen()),
-                                ),
+                            : () => Navigator.of(
+                                context,
+                              ).push(MaterialPageRoute(builder: (_) => const SignupScreen())),
                         child: const Text('Create account'),
                       ),
                     ],

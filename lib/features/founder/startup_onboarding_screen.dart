@@ -8,54 +8,62 @@ import '../../core/widgets.dart';
 import '../../models/startup.dart';
 import '../../providers/providers.dart';
 
-/// First-run flow for founders: register the startup profile.
-/// The profile is created with `verified: false`; an ALU admin flips the
-/// flag from the Firebase console after checking the venture is recognised.
-class StartupOnboardingScreen extends ConsumerStatefulWidget {
-  const StartupOnboardingScreen({super.key});
+class StartupFormScreen extends ConsumerStatefulWidget {
+  const StartupFormScreen({super.key, this.startup});
+
+  final Startup? startup;
 
   @override
-  ConsumerState<StartupOnboardingScreen> createState() =>
-      _StartupOnboardingScreenState();
+  ConsumerState<StartupFormScreen> createState() => _StartupFormScreenState();
 }
 
-class _StartupOnboardingScreenState
-    extends ConsumerState<StartupOnboardingScreen> {
+class _StartupFormScreenState extends ConsumerState<StartupFormScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _name = TextEditingController();
-  final _description = TextEditingController();
-  final _mission = TextEditingController();
-  String _category = OpportunityCategories.all.first;
+  late final _name = TextEditingController(text: widget.startup?.name);
+  late final _description = TextEditingController(text: widget.startup?.description);
+  late final _mission = TextEditingController(text: widget.startup?.mission);
+  late String _category = widget.startup?.category ?? OpportunityCategories.all.first;
   bool _busy = false;
+
+  bool get _editing => widget.startup != null;
 
   @override
   void dispose() {
-    _name.dispose();
-    _description.dispose();
-    _mission.dispose();
+    for (final controller in [_name, _description, _mission]) {
+      controller.dispose();
+    }
     super.dispose();
   }
 
-  Future<void> _create() async {
+  Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
-    final auth = ref.read(authStateProvider).value;
-    if (auth == null) return;
+    final ownerId = widget.startup?.ownerId ?? ref.read(authStateProvider).value?.uid;
+    if (ownerId == null) return;
     setState(() => _busy = true);
+    final startup = Startup(
+      id: widget.startup?.id ?? '',
+      ownerId: ownerId,
+      name: _name.text.trim(),
+      category: _category,
+      description: _description.text.trim(),
+      mission: _mission.text.trim(),
+      verified: widget.startup?.verified ?? false,
+    );
     try {
-      await ref.read(startupRepositoryProvider).create(Startup(
-            id: '',
-            ownerId: auth.uid,
-            name: _name.text.trim(),
-            category: _category,
-            description: _description.text.trim(),
-            mission: _mission.text.trim(),
-          ));
-      // FounderShell watches the startup stream and switches automatically.
+      final repo = ref.read(startupRepositoryProvider);
+      _editing ? await repo.update(startup) : await repo.create(startup);
+      if (mounted && _editing) {
+        Navigator.pop(context);
+        showAppSnackBar(context, 'Startup profile updated.');
+      }
     } catch (_) {
       if (mounted) {
         setState(() => _busy = false);
-        showAppSnackBar(context, 'Could not create startup profile.',
-            error: true);
+        showAppSnackBar(
+          context,
+          _editing ? 'Could not save changes.' : 'Could not create startup profile.',
+          error: true,
+        );
       }
     }
   }
@@ -64,14 +72,16 @@ class _StartupOnboardingScreenState
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Register your startup'),
-        actions: [
-          IconButton(
-            tooltip: 'Log out',
-            icon: const Icon(Icons.logout_rounded),
-            onPressed: () => ref.read(authRepositoryProvider).signOut(),
-          ),
-        ],
+        title: Text(_editing ? 'Edit startup' : 'Register your startup'),
+        actions: _editing
+            ? null
+            : [
+                IconButton(
+                  tooltip: 'Log out',
+                  icon: const Icon(Icons.logout_rounded),
+                  onPressed: () => ref.read(authRepositoryProvider).signOut(),
+                ),
+              ],
       ),
       body: SafeArea(
         child: Form(
@@ -79,30 +89,34 @@ class _StartupOnboardingScreenState
           child: ListView(
             padding: const EdgeInsets.all(20),
             children: [
-              const Text(
-                'Tell students about your venture',
-                style: TextStyle(fontSize: 21, fontWeight: FontWeight.w800),
-              ),
-              const SizedBox(height: 6),
-              const Text(
-                'This profile is shown on every opportunity you post.',
-                style: TextStyle(color: AppColors.textSecondary),
-              ),
-              const SizedBox(height: 20),
+              if (!_editing) ...[
+                const Text(
+                  'Tell students about your venture',
+                  style: TextStyle(fontSize: 21, fontWeight: FontWeight.w800),
+                ),
+                const SizedBox(height: 6),
+                const Text(
+                  'This profile is shown on every opportunity you post.',
+                  style: TextStyle(color: AppColors.textSecondary),
+                ),
+                const SizedBox(height: 20),
+              ],
               TextFormField(
                 controller: _name,
                 textCapitalization: TextCapitalization.words,
-                decoration: const InputDecoration(
-                    labelText: 'Startup name',
-                    prefixIcon: Icon(Icons.storefront_outlined)),
+                decoration: InputDecoration(
+                  labelText: 'Startup name',
+                  prefixIcon: _editing ? null : const Icon(Icons.storefront_outlined),
+                ),
                 validator: (v) => Validators.required(v, 'Startup name'),
               ),
               const SizedBox(height: 14),
               DropdownButtonFormField<String>(
                 initialValue: _category,
-                decoration: const InputDecoration(
-                    labelText: 'Primary category',
-                    prefixIcon: Icon(Icons.category_outlined)),
+                decoration: InputDecoration(
+                  labelText: _editing ? 'Category' : 'Primary category',
+                  prefixIcon: _editing ? null : const Icon(Icons.category_outlined),
+                ),
                 items: [
                   for (final c in OpportunityCategories.all)
                     DropdownMenuItem(value: c, child: Text(c)),
@@ -115,9 +129,10 @@ class _StartupOnboardingScreenState
                 maxLines: 4,
                 maxLength: 400,
                 textCapitalization: TextCapitalization.sentences,
-                decoration: const InputDecoration(
-                    labelText: 'What does your startup do?',
-                    alignLabelWithHint: true),
+                decoration: InputDecoration(
+                  labelText: _editing ? 'Description' : 'What does your startup do?',
+                  alignLabelWithHint: true,
+                ),
                 validator: (v) => Validators.minLength(v, 30, 'Description'),
               ),
               const SizedBox(height: 8),
@@ -127,35 +142,28 @@ class _StartupOnboardingScreenState
                 maxLength: 150,
                 textCapitalization: TextCapitalization.sentences,
                 decoration: const InputDecoration(
-                    labelText: 'Mission (optional)', alignLabelWithHint: true),
+                  labelText: 'Mission (optional)',
+                  alignLabelWithHint: true,
+                ),
               ),
               const SizedBox(height: 12),
-              Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: AppColors.infoSoft,
-                  borderRadius: BorderRadius.circular(14),
+              if (!_editing) ...[
+                const InfoBanner(
+                  icon: Icons.verified_user_outlined,
+                  message:
+                      'New startups are reviewed by the ALU venture team '
+                      'before they can post opportunities. You can set up '
+                      'everything else in the meantime.',
+                  color: AppColors.info,
+                  background: AppColors.infoSoft,
                 ),
-                child: const Row(
-                  children: [
-                    Icon(Icons.verified_user_outlined, color: AppColors.info),
-                    SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        'New startups are reviewed by the ALU venture team '
-                        'before they can post opportunities. You can set up '
-                        'everything else in the meantime.',
-                        style: TextStyle(fontSize: 13, color: AppColors.info),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 20),
+                const SizedBox(height: 20),
+              ],
               PrimaryButton(
-                  label: 'Create startup profile',
-                  busy: _busy,
-                  onPressed: _create),
+                label: _editing ? 'Save changes' : 'Create startup profile',
+                busy: _busy,
+                onPressed: _save,
+              ),
             ],
           ),
         ),

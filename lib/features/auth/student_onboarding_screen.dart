@@ -8,19 +8,14 @@ import '../../core/widgets.dart';
 import '../../providers/providers.dart';
 import 'auth_gate.dart';
 
-/// One-time step after student signup: pick skills so the home screen can
-/// recommend matching opportunities from day one. Skippable — skills can
-/// always be added later from the profile tab.
 class StudentOnboardingScreen extends ConsumerStatefulWidget {
   const StudentOnboardingScreen({super.key});
 
   @override
-  ConsumerState<StudentOnboardingScreen> createState() =>
-      _StudentOnboardingScreenState();
+  ConsumerState<StudentOnboardingScreen> createState() => _StudentOnboardingScreenState();
 }
 
-class _StudentOnboardingScreenState
-    extends ConsumerState<StudentOnboardingScreen> {
+class _StudentOnboardingScreenState extends ConsumerState<StudentOnboardingScreen> {
   List<String> _skills = [];
   bool _busy = false;
 
@@ -33,17 +28,12 @@ class _StudentOnboardingScreenState
     }
     setState(() => _busy = true);
     try {
-      await ref.read(userRepositoryProvider).updateProfile(
-            user.uid,
-            name: user.name,
-            bio: user.bio,
-            skills: _skills,
-          );
-      // AuthGate sees the updated profile stream and moves to the shell.
+      await ref
+          .read(userRepositoryProvider)
+          .updateProfile(user.uid, name: user.name, bio: user.bio, skills: _skills);
     } catch (_) {
       if (mounted) {
-        showAppSnackBar(context, 'Could not save skills. Try again.',
-            error: true);
+        showAppSnackBar(context, 'Could not save skills. Try again.', error: true);
         setState(() => _busy = false);
       }
     }
@@ -51,8 +41,7 @@ class _StudentOnboardingScreenState
 
   @override
   Widget build(BuildContext context) {
-    final name =
-        ref.watch(currentUserProvider).value?.name.split(' ').first;
+    final name = ref.watch(currentUserProvider).value?.name.split(' ').first;
     return Scaffold(
       body: SafeArea(
         child: Padding(
@@ -63,15 +52,13 @@ class _StudentOnboardingScreenState
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
-                  onPressed: () =>
-                      ref.read(onboardingSkippedProvider.notifier).skip(),
+                  onPressed: () => ref.read(onboardingSkippedProvider.notifier).skip(),
                   child: const Text('Skip for now'),
                 ),
               ),
               Text(
                 name == null ? 'What are you good at?' : 'Hi $name.\nWhat are you good at?',
-                style:
-                    const TextStyle(fontSize: 24, fontWeight: FontWeight.w800),
+                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800),
               ),
               const SizedBox(height: 6),
               const Text(

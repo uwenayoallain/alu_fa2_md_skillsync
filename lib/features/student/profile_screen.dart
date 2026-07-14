@@ -10,8 +10,6 @@ import '../../models/application.dart';
 import '../../providers/providers.dart';
 import 'widgets/opportunity_card.dart';
 
-/// Student profile: live application stats, skills, saved opportunities,
-/// profile editing and sign-out.
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
 
@@ -25,38 +23,35 @@ class ProfileScreen extends ConsumerWidget {
         value: userAsync,
         builder: (user) {
           if (user == null) return const SizedBox.shrink();
-          final shortlisted = apps
-              .where((a) => a.status == ApplicationStatus.shortlisted)
-              .length;
-          final accepted =
-              apps.where((a) => a.status == ApplicationStatus.accepted).length;
+          final shortlisted = apps.where((a) => a.status == ApplicationStatus.shortlisted).length;
+          final accepted = apps.where((a) => a.status == ApplicationStatus.accepted).length;
 
           return ListView(
             padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
             children: [
               const Center(
-                child: Text('Profile',
-                    style:
-                        TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
+                child: Text('Profile', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
               ),
               const SizedBox(height: 20),
               Center(child: InitialsAvatar(user.name, size: 84)),
               const SizedBox(height: 12),
               Center(
-                child: Text(user.name,
-                    style: const TextStyle(
-                        fontSize: 20, fontWeight: FontWeight.w800)),
+                child: Text(
+                  user.name,
+                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+                ),
               ),
               Center(
-                child: Text(user.email,
-                    style: const TextStyle(color: AppColors.textSecondary)),
+                child: Text(user.email, style: const TextStyle(color: AppColors.textSecondary)),
               ),
               if (user.bio.isNotEmpty) ...[
                 const SizedBox(height: 10),
                 Center(
-                  child: Text(user.bio,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(fontSize: 13.5, height: 1.4)),
+                  child: Text(
+                    user.bio,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 13.5, height: 1.4),
+                  ),
                 ),
               ],
               const SizedBox(height: 20),
@@ -86,22 +81,23 @@ class ProfileScreen extends ConsumerWidget {
               Card(
                 child: Column(
                   children: [
-                    _MenuTile(
+                    MenuTile(
                       icon: Icons.edit_outlined,
                       label: 'Edit profile & skills',
-                      onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                          builder: (_) => EditProfileScreen(user: user))),
+                      onTap: () => Navigator.of(
+                        context,
+                      ).push(MaterialPageRoute(builder: (_) => EditProfileScreen(user: user))),
                     ),
                     const Divider(height: 1, color: AppColors.outline),
-                    _MenuTile(
+                    MenuTile(
                       icon: Icons.bookmark_outline_rounded,
-                      label:
-                          'Saved opportunities (${user.savedOpportunityIds.length})',
-                      onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                          builder: (_) => const SavedOpportunitiesScreen())),
+                      label: 'Saved opportunities (${user.savedOpportunityIds.length})',
+                      onTap: () => Navigator.of(
+                        context,
+                      ).push(MaterialPageRoute(builder: (_) => const SavedOpportunitiesScreen())),
                     ),
                     const Divider(height: 1, color: AppColors.outline),
-                    _MenuTile(
+                    MenuTile(
                       icon: Icons.logout_rounded,
                       label: 'Log out',
                       color: AppColors.danger,
@@ -117,28 +113,16 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
-  void _confirmLogout(BuildContext context, WidgetRef ref) {
-    showDialog<void>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Log out?'),
-        content: const Text('You can sign back in anytime.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            style: TextButton.styleFrom(foregroundColor: AppColors.danger),
-            onPressed: () {
-              Navigator.of(dialogContext).pop();
-              ref.read(authRepositoryProvider).signOut();
-            },
-            child: const Text('Log out'),
-          ),
-        ],
-      ),
-    );
+  Future<void> _confirmLogout(BuildContext context, WidgetRef ref) async {
+    if (await confirmDanger(
+      context,
+      title: 'Log out?',
+      content: 'You can sign back in anytime.',
+      cancel: 'Cancel',
+      confirm: 'Log out',
+    )) {
+      ref.read(authRepositoryProvider).signOut();
+    }
   }
 }
 
@@ -153,49 +137,15 @@ class _Stat extends StatelessWidget {
     return Expanded(
       child: Column(
         children: [
-          Text('$count',
-              style:
-                  const TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
+          Text('$count', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
           const SizedBox(height: 2),
-          Text(label,
-              style: const TextStyle(
-                  fontSize: 12, color: AppColors.textSecondary)),
+          Text(label, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
         ],
       ),
     );
   }
 }
 
-class _MenuTile extends StatelessWidget {
-  const _MenuTile(
-      {required this.icon,
-      required this.label,
-      required this.onTap,
-      this.color});
-
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-  final Color? color;
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      leading: Icon(icon, color: color ?? AppColors.textPrimary),
-      title: Text(label,
-          style: TextStyle(
-              color: color ?? AppColors.textPrimary,
-              fontWeight: FontWeight.w600,
-              fontSize: 14.5)),
-      trailing: const Icon(Icons.chevron_right_rounded,
-          color: AppColors.textSecondary),
-      onTap: onTap,
-    );
-  }
-}
-
-/// Edit name, bio and skills. Saving writes to Firestore and every screen
-/// watching the profile (home greeting, recommendations) updates instantly.
 class EditProfileScreen extends ConsumerStatefulWidget {
   const EditProfileScreen({super.key, required this.user});
 
@@ -223,7 +173,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _busy = true);
     try {
-      await ref.read(userRepositoryProvider).updateProfile(
+      await ref
+          .read(userRepositoryProvider)
+          .updateProfile(
             widget.user.uid,
             name: _name.text.trim(),
             bio: _bio.text.trim(),
@@ -255,8 +207,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                 controller: _name,
                 textCapitalization: TextCapitalization.words,
                 decoration: const InputDecoration(
-                    labelText: 'Full name',
-                    prefixIcon: Icon(Icons.person_outline_rounded)),
+                  labelText: 'Full name',
+                  prefixIcon: Icon(Icons.person_outline_rounded),
+                ),
                 validator: (v) => Validators.required(v, 'Full name'),
               ),
               const SizedBox(height: 14),
@@ -266,12 +219,12 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                 maxLength: 200,
                 textCapitalization: TextCapitalization.sentences,
                 decoration: const InputDecoration(
-                    labelText: 'Short bio',
-                    hintText: 'e.g. BSE student passionate about product design'),
+                  labelText: 'Short bio',
+                  hintText: 'e.g. BSE student passionate about product design',
+                ),
               ),
               const SizedBox(height: 8),
-              const Text('Skills',
-                  style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
+              const Text('Skills', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
               const SizedBox(height: 10),
               SkillPicker(
                 selected: _skills,
@@ -288,14 +241,12 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   }
 }
 
-/// Bookmarked opportunities, resolved live against the open feed.
 class SavedOpportunitiesScreen extends ConsumerWidget {
   const SavedOpportunitiesScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final savedIds =
-        ref.watch(currentUserProvider).value?.savedOpportunityIds ?? [];
+    final savedIds = ref.watch(currentUserProvider).value?.savedOpportunityIds ?? [];
     final opps = ref.watch(openOpportunitiesProvider);
 
     return Scaffold(
@@ -308,8 +259,7 @@ class SavedOpportunitiesScreen extends ConsumerWidget {
             return const EmptyState(
               icon: Icons.bookmark_outline_rounded,
               title: 'Nothing saved yet',
-              message:
-                  'Tap the bookmark icon on any opportunity to keep it here.',
+              message: 'Tap the bookmark icon on any opportunity to keep it here.',
             );
           }
           return ListView.separated(

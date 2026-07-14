@@ -1,10 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-/// Startup profile stored at `startups/{id}`.
-///
-/// `verified` starts false and can only be flipped by an admin from the
-/// Firebase console — security rules reject any client write that changes it.
-/// This is how the platform guarantees only recognised ALU ventures can post.
 class Startup {
   const Startup({
     required this.id,
@@ -23,6 +18,7 @@ class Startup {
   final String category;
   final String description;
   final String mission;
+  // Security rules prevent clients from changing this flag.
   final bool verified;
   final DateTime? createdAt;
 
@@ -41,14 +37,12 @@ class Startup {
   }
 
   Map<String, dynamic> toMap() => {
-        'ownerId': ownerId,
-        'name': name,
-        'category': category,
-        'description': description,
-        'mission': mission,
-        'verified': verified,
-        'createdAt': createdAt == null
-            ? FieldValue.serverTimestamp()
-            : Timestamp.fromDate(createdAt!),
-      };
+    'ownerId': ownerId,
+    'name': name,
+    'category': category,
+    'description': description,
+    'mission': mission,
+    'verified': verified,
+    'createdAt': createdAt == null ? FieldValue.serverTimestamp() : Timestamp.fromDate(createdAt!),
+  };
 }
