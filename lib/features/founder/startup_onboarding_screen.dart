@@ -86,6 +86,7 @@ class _StartupFormScreenState extends ConsumerState<StartupFormScreen> {
       body: SafeArea(
         child: Form(
           key: _formKey,
+          autovalidateMode: AutovalidateMode.onUserInteraction,
           child: ListView(
             padding: const EdgeInsets.all(20),
             children: [

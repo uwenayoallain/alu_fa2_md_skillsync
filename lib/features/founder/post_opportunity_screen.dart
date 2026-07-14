@@ -93,6 +93,7 @@ class _PostOpportunityScreenState extends ConsumerState<PostOpportunityScreen> {
       body: SafeArea(
         child: Form(
           key: _formKey,
+          autovalidateMode: AutovalidateMode.onUserInteraction,
           child: ListView(
             padding: const EdgeInsets.all(20),
             children: [

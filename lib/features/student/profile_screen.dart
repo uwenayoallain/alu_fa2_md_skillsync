@@ -200,6 +200,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       body: SafeArea(
         child: Form(
           key: _formKey,
+          autovalidateMode: AutovalidateMode.onUserInteraction,
           child: ListView(
             padding: const EdgeInsets.all(20),
             children: [
